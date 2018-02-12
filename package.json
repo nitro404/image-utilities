@@ -1,0 +1,38 @@
+{
+  "name": "image-utilities",
+  "version": "1.0.0",
+  "description": "A collection of useful image file helper functions.",
+  "main": "src/image-utilities.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nitro404/image-utilities.git"
+  },
+  "keywords": [
+    "image",
+    "information",
+    "manipulation",
+    "helper",
+    "utility",
+    "utilities",
+    "function"
+  ],
+  "author": {
+    "name": "Kevin Scroggins"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nitro404/image-utilities/issues"
+  },
+  "homepage": "https://github.com/nitro404/image-utilities#readme",
+  "dependencies": {
+    "async": "^2.6.0",
+    "extra-utilities": "^1.1.0",
+    "file-utilities": "^1.0.0",
+    "fs-extra": "^5.0.0",
+    "image-size": "^0.6.2",
+    "jimp": "^0.2.28"
+  }
+}
