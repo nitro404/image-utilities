@@ -11,7 +11,7 @@ A collection of useful image file helper functions.
 ## Server-Side Usage
 
 ```javascript
-const imageUtilities = require("image-utilities");
+var imageUtilities = require("image-utilities");
 
 imageUtilities.getImageInformation(
 	"./data/image.png",
