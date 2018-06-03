@@ -327,18 +327,27 @@ describe("Image Utilities", function() {
 			);
 		});
 
-		it("should return an error if the source and destination files are the same but in different case", function(callback) {
+		it("should " + (process.platform === "win32" ? "not " : "") + "return an error if the source and destination files are the same but in different case on " + process.platform, function(callback) {
+			var newOutputImage = path.join(path.dirname(validResizeImageOptions.source), path.basename(validResizeImageOptions.source).toUpperCase());
+
 			imageUtilities.resizeImage(
 				utilities.merge(
 					validResizeImageOptions,
 					{
-						destination: path.join(path.dirname(validResizeImageOptions.source), path.basename(validResizeImageOptions.source).toUpperCase())
+						destination: newOutputImage
 					}
 				),
 				function(error, info) {
-					expect(error).to.not.equal(null);
-					expect(error.message).to.equal("Source and destination file are the same!");
-					expect(info).to.be.undefined;
+					if(process.platform === "win32") {
+						expect(error).to.not.equal(null);
+						expect(error.message).to.equal("Source and destination file are the same!");
+						expect(info).to.be.undefined;
+					}
+					else {
+						expect(error).to.equal(null);
+						expect(utilities.isObjectStrict(info)).to.equal(true);
+						expect(info).to.deep.equal(utilities.merge({ path: newOutputImage }, resizedImageInfo));
+					}
 
 					return callback();
 				}
