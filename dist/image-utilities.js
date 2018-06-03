@@ -9,35 +9,49 @@ var imageUtilities = { };
 
 imageUtilities.getImageInformation = function(imageFilePath, callback) {
 	if(!utilities.isFunction(callback)) {
-		throw new Error("Missing or invalid callback.");
+		throw new Error("Missing or invalid callback function!");
 	}
 
 	if(utilities.isEmptyString(imageFilePath)) {
 		return callback(new Error("Missing or invalid image file path!"));
 	}
 
-	return fileUtilities.getFileInformation(
-		imageFilePath,
-		function(error, info) {
+	return async.waterfall(
+		[
+			function(callback) {
+				return fileUtilities.getFileInformation(
+					imageFilePath,
+					function(error, info) {
+						if(error) {
+							return callback(error);
+						}
+
+						return callback(null, info);
+					}
+				);
+			},
+			function(info, callback) {
+				return imageSize(
+					imageFilePath,
+					function(error, dimensions) {
+						if(error) {
+							return callback(error);
+						}
+
+						return callback(null, info, {
+							width: dimensions.width,
+							height: dimensions.height
+						});
+					}
+				);
+			}
+		],
+		function(error, info, size) {
 			if(error) {
 				return callback(error);
 			}
 
-			return imageSize(
-				imageFilePath,
-				function(error, dimensions) {
-					if(error) {
-						return callback(error);
-					}
-
-					return callback(null, {
-						width: dimensions.width,
-						height: dimensions.height,
-						fileSize: info.fileSize,
-						md5: info.md5
-					});
-				}
-			);
+			return callback(null, utilities.merge(info, size));
 		}
 	);
 };
