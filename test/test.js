@@ -24,9 +24,6 @@ var invalidPathCharacters = null;
 if(process.platform === "win32") {
 	invalidPathCharacters = "<>:\"|?*";
 }
-else {
-	invalidPathCharacters = ":\"?*";
-}
 
 var verbose = false;
 
@@ -335,7 +332,7 @@ describe("Image Utilities", function() {
 				utilities.merge(
 					validResizeImageOptions,
 					{
-						destination: validResizeImageOptions.source.toUpperCase()
+						destination: path.join(path.dirname(validResizeImageOptions.source), path.basename(validResizeImageOptions.source).toUpperCase())
 					}
 				),
 				function(error, info) {
@@ -473,30 +470,32 @@ describe("Image Utilities", function() {
 			);
 		});
 
-		it("should return an error if an invalid character is used in the destination path", function(callback) {
-			return async.eachSeries(
-				Array.from(invalidPathCharacters),
-				function(invalidCharacter, callback) {
-					return imageUtilities.resizeImage(
-						utilities.merge(
-							validResizeImageOptions,
-							{
-								destination: path.join(path.dirname(validResizeImageOptions.destination), "te" + invalidCharacter + "st", path.basename(validResizeImageOptions.destination))
-							}
-						),
-						function(error, info) {
-							expect(error).to.not.equal(null);
-							expect(error.code).to.equal("EINVAL");
-							expect(info).to.be.undefined;
+		if(utilities.isValid(invalidPathCharacters)) {
+			it("should return an error if an invalid character is used in the destination path", function(callback) {
+				return async.eachSeries(
+					Array.from(invalidPathCharacters),
+					function(invalidCharacter, callback) {
+						return imageUtilities.resizeImage(
+							utilities.merge(
+								validResizeImageOptions,
+								{
+									destination: path.join(path.dirname(validResizeImageOptions.destination), "te" + invalidCharacter + "st", path.basename(validResizeImageOptions.destination))
+								}
+							),
+							function(error, info) {
+								expect(error).to.not.equal(null);
+								expect(error.code).to.equal("EINVAL");
+								expect(info).to.be.undefined;
 
-							return callback();
-						}
-					);
-				},
-				function(error) {
-					return callback();
-				}
-			);
-		});
+								return callback();
+							}
+						);
+					},
+					function(error) {
+						return callback();
+					}
+				);
+			});
+		}
 	});
 });
