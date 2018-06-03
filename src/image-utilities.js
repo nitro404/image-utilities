@@ -177,5 +177,4 @@ imageUtilities.resizeImage = function(options, callback) {
 	);
 };
 
-
 module.exports = imageUtilities;
