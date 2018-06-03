@@ -1,4 +1,5 @@
 var async = require("async");
+var path = require("path");
 var fs = require("fs-extra");
 var imageSize = require("image-size");
 var jimp = require("jimp");
@@ -6,6 +7,57 @@ var utilities = require("extra-utilities");
 var fileUtilities = require("file-utilities");
 
 var imageUtilities = { };
+
+var resizeImageFormat = {
+	type: "object",
+	removeExtra: true,
+	nonEmpty: true,
+	order: true,
+	strict: true,
+	autopopulate: true,
+	required: true,
+	format: {
+		source: {
+			type: "string",
+			trim: true,
+			nonEmpty: true,
+			required: true
+		},
+		destination: {
+			type: "string",
+			trim: true,
+			nonEmpty: true,
+			required: true
+		},
+		width: {
+			type: "integer",
+			required: true,
+			validator: function(value) {
+				return value > 0;
+			}
+		},
+		height: {
+			type: "integer",
+			required: true,
+			validator: function(value) {
+				return value > 0;
+			}
+		},
+		overwrite: {
+			type: "boolean",
+			default: false
+		},
+		information: {
+			type: "boolean",
+			default: true
+		}
+	}
+};
+
+var resizeImageOptions = {
+	throwErrors: true,
+	verbose: false
+};
 
 imageUtilities.getImageInformation = function(imageFilePath, callback) {
 	if(!utilities.isFunction(callback)) {
@@ -57,88 +109,78 @@ imageUtilities.getImageInformation = function(imageFilePath, callback) {
 };
 
 imageUtilities.resizeImage = function(options, callback) {
-	var formattedOptions = null;
+	if(!utilities.isFunction(callback)) {
+		throw new Error("Missing or invalid callback function!");
+	}
 
 	try {
-		formattedOptions = utilities.formatObject(
-			options,
-			{
-				source: {
-					type: "string",
-					trim: true,
-					required: true
-				},
-				destination: {
-					type: "string",
-					trim: true,
-					required: true
-				},
-				width: {
-					type: "number",
-					subtype: "integer",
-					required: true,
-					validator: function(value) {
-						return value > 0;
-					}
-				},
-				height: {
-					type: "number",
-					subtype: "integer",
-					required: true,
-					validator: function(value) {
-						return value > 0;
-					}
-				},
-				overwrite: {
-					type: "boolean",
-					required: false,
-					default: false
-				},
-				information: {
-					type: "boolean",
-					default: true
-				}
-			},
-			true,
-			true
-		);
+		options = utilities.formatValue(options, resizeImageFormat, resizeImageOptions);
 	}
 	catch(error) {
-		error.status = 400;
-		return callback(error);
-	}
-
-	if(formattedOptions === null) {
-		var error = new Error("Missing or invalid image resizing options.");
-		error.status = 400;
-		return callback(error);
-	}
-
-	if(!fs.existsSync(formattedOptions.source)) {
-		var error = new Error("Image resizing failed, source file does not exist!");
-		error.status = 400;
-		return callback(error);
-	}
-
-	if(fs.existsSync(formattedOptions.destination) && !formattedOptions.overwrite) {
-		var error = new Error("Destination file already exists! Use truthful overwrite option or remove image and try again.");
-		error.status = 400;
 		return callback(error);
 	}
 
 	return async.waterfall(
 		[
 			function(callback) {
-				var filePath = utilities.getFilePath(formattedOptions.destination);
+				return fs.stat(
+					options.source,
+					function(error, stats) {
+						if(error) {
+							return callback(error);
+						}
 
-				if(utilities.isEmptyString(filePath)) {
-					return callback();
-				}
+						if(stats.isDirectory()) {
+							return callback(new Error("Source image path cannot be a directory!"));
+						}
 
-				if(fs.existsSync(filePath)) { return callback(); }
+						return callback();
+					}
+				);
+			},
+			function(callback) {
+				return fs.stat(
+					options.destination,
+					function(error, stats) {
+						if(error && error.code !== "ENOENT") {
+							return callback(error);
+						}
 
-				return fs.mkdirp(
-					filePath,
+						if(utilities.isEmptyString(path.extname(options.destination))) {
+							options.destination = path.join(options.destination, path.basename(options.source));
+						}
+
+						return callback();
+					}
+				);
+			},
+			function(callback) {
+				return fs.stat(
+					options.destination,
+					function(error, stats) {
+						if(error && error.code !== "ENOENT") {
+							return callback(error);
+						}
+
+						if(utilities.isValid(stats)) {
+							if(path.resolve(options.source).localeCompare(path.resolve(options.destination), { }, { sensitivity: "accent" }) === 0) {
+								return callback(new Error("Source and destination file are the same!"));
+							}
+
+							if(!options.overwrite) {
+								return callback(new Error("Destination file already exists!"));
+							}
+						}
+
+						return callback();
+					}
+				);
+			},
+			function(callback) {
+				var destinationPath = path.dirname(options.destination);
+
+				return fs.mkdirs(
+					destinationPath,
 					function(error) {
 						if(error) {
 							return callback(error);
@@ -149,44 +191,38 @@ imageUtilities.resizeImage = function(options, callback) {
 				);
 			},
 			function(callback) {
-				return jimp.read(formattedOptions.source, function(error, image) {
+				return jimp.read(options.source, function(error, image) {
 					if(error) {
 						return callback(error);
 					}
 
-					return image.scaleToFit(formattedOptions.width, formattedOptions.height)
-						.write(formattedOptions.destination, function() { return callback(); });
+					return image.scaleToFit(options.width, options.height)
+						.write(options.destination, function() { return callback(); });
 				});
 			},
 			function(callback) {
-				if(!formattedOptions.information) {
-					return callback(null, null);
+				if(!options.information) {
+					return callback(null, options.destination);
 				}
 
 				return imageUtilities.getImageInformation(
-					formattedOptions.destination,
+					options.destination,
 					function(error, information) {
 						if(error) {
 							return callback(error);
 						}
 
-						information.path = formattedOptions.destination;
-
-						return callback(null, information);
+						return callback(null, options.destination, information);
 					}
 				);
 			}
 		],
-		function(error, information) {
+		function(error, filePath, information) {
 			if(error) {
 				return callback(error);
 			}
 
-			if(utilities.isValid(information)) {
-				return callback(null, information);
-			}
-
-			return callback();
+			return callback(null, utilities.merge({ path: filePath }, information));
 		}
 	);
 };
