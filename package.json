@@ -35,7 +35,7 @@
   "dependencies": {
     "async": "^2.6.1",
     "extra-utilities": "^1.2.14",
-    "file-utilities": "^1.0.2",
+    "file-utilities": "^1.0.3",
     "fs-extra": "^5.0.0",
     "image-size": "^0.6.2",
     "jimp": "^0.2.28"
