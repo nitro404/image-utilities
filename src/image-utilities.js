@@ -125,23 +125,23 @@ imageUtilities.resizeImage = function(options, callback) {
 			function(callback) {
 				return fs.stat(
 					options.source,
-					function(error, stats) {
+					function(error, sourceStats) {
 						if(error) {
 							return callback(error);
 						}
 
-						if(stats.isDirectory()) {
+						if(sourceStats.isDirectory()) {
 							return callback(new Error("Source image path cannot be a directory!"));
 						}
 
-						return callback();
+						return callback(null, sourceStats);
 					}
 				);
 			},
-			function(callback) {
+			function(sourceStats, callback) {
 				return fs.stat(
 					options.destination,
-					function(error, stats) {
+					function(error, destinationStats) {
 						if(error && error.code !== "ENOENT") {
 							return callback(error);
 						}
@@ -150,20 +150,20 @@ imageUtilities.resizeImage = function(options, callback) {
 							options.destination = path.join(options.destination, path.basename(options.source));
 						}
 
-						return callback();
+						return callback(null, sourceStats);
 					}
 				);
 			},
-			function(callback) {
+			function(sourceStats, callback) {
 				return fs.stat(
 					options.destination,
-					function(error, stats) {
+					function(error, destinationStats) {
 						if(error && error.code !== "ENOENT") {
 							return callback(error);
 						}
 
-						if(utilities.isValid(stats)) {
-							if(path.resolve(options.source).localeCompare(path.resolve(options.destination), { }, { sensitivity: "accent" }) === 0) {
+						if(utilities.isValid(destinationStats)) {
+							if(sourceStats.ino === destinationStats.ino) {
 								return callback(new Error("Source and destination file are the same!"));
 							}
 
