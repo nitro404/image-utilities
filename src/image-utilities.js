@@ -1,16 +1,16 @@
 "use strict";
 
-var async = require("async");
-var path = require("path");
-var fs = require("fs-extra");
-var imageSize = require("image-size");
-var jimp = require("jimp");
-var utilities = require("extra-utilities");
-var fileUtilities = require("file-utilities");
+const async = require("async");
+const path = require("path");
+const fs = require("fs-extra");
+const imageSize = require("image-size");
+const jimp = require("jimp");
+const utilities = require("extra-utilities");
+const fileUtilities = require("file-utilities");
 
-var imageUtilities = { };
+const imageUtilities = { };
 
-var resizeImageFormat = {
+const resizeImageFormat = {
 	type: "object",
 	removeExtra: true,
 	nonEmpty: true,
@@ -56,7 +56,7 @@ var resizeImageFormat = {
 	}
 };
 
-var resizeImageOptions = {
+const resizeImageOptions = {
 	throwErrors: true,
 	verbose: false
 };
@@ -179,10 +179,8 @@ imageUtilities.resizeImage = function(options, callback) {
 				);
 			},
 			function(callback) {
-				var destinationPath = path.dirname(options.destination);
-
 				return fs.mkdirs(
-					destinationPath,
+					path.dirname(options.destination),
 					function(error) {
 						if(error) {
 							return callback(error);

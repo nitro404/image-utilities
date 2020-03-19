@@ -1,16 +1,16 @@
 "use strict";
 
-var imageUtilities = require("../dist/image-utilities.js");
-var async = require("async");
-var utilities = require("extra-utilities");
-var path = require("path");
-var fs = require("fs-extra");
-var chai = require("chai");
-var expect = chai.expect;
+const imageUtilities = require("../src/image-utilities.js");
+const async = require("async");
+const utilities = require("extra-utilities");
+const path = require("path");
+const fs = require("fs-extra");
+const chai = require("chai");
+const expect = chai.expect;
 
-var tempDirectory = path.join(__dirname, "temp");
+const tempDirectory = path.join(__dirname, "temp");
 
-var paths = {
+const paths = {
 	tempDirectory: tempDirectory,
 	testImage: path.join(__dirname, "data/test.png"),
 	testJson: path.join(__dirname, "data/test.json"),
@@ -19,13 +19,13 @@ var paths = {
 	localOutputImage: path.join(__dirname, "test_local.png")
 };
 
-var invalidPathCharacters = null;
+let invalidPathCharacters = null;
 
 if(process.platform === "win32") {
 	invalidPathCharacters = "<>:\"|?*";
 }
 
-var verbose = false;
+const verbose = false;
 
 describe("Image Utilities", function() {
 	describe("getImageInformation", function() {
@@ -34,7 +34,7 @@ describe("Image Utilities", function() {
 		});
 
 		it("should throw an error if no callback function is provided", function() {
-			var thrownError = null;
+			let thrownError = null;
 
 			try { imageUtilities.getImageInformation(); }
 			catch(error) { thrownError = error; }
@@ -110,16 +110,16 @@ describe("Image Utilities", function() {
 	});
 
 	describe("resizeImage", function() {
-		var validResizeImageOptions = {
+		const validResizeImageOptions = {
 			source: paths.testImage,
 			destination: paths.outputImage,
 			width: 8,
 			height: 6
 		};
 
-		var resizedImageInfo = {
-			fileSize: 225,
-			md5: "20563c7199dcf4a8fa6c5d90c722bd14",
+		const resizedImageInfo = {
+			fileSize: 213,
+			md5: "dcf4e631bc95f7ad1c5547b19ac0cbbf",
 			width: 8,
 			height: 6
 		};
@@ -173,7 +173,7 @@ describe("Image Utilities", function() {
 		});
 
 		it("should throw an error if no callback function is provided", function() {
-			var thrownError = null;
+			let thrownError = null;
 
 			try { imageUtilities.resizeImage(); }
 			catch(error) { thrownError = error; }
@@ -183,7 +183,7 @@ describe("Image Utilities", function() {
 		});
 
 		it("should return an error if invalid options are provided", function(callback) {
-			var invalidOptions = [
+			const invalidOptions = [
 				undefined, null, false, true, new Boolean(false), new Boolean(true), 0, 1, 3.141592654, NaN, Infinity, -Infinity, "", "test", " trim\t", { }, { nice: "meme" }, [ ], [0], new Date(), function() { }, new RegExp(".+"),
 				{
 					source: paths.testImage,
@@ -328,7 +328,7 @@ describe("Image Utilities", function() {
 		});
 
 		it("should " + (process.platform === "win32" ? "not " : "") + "return an error if the source and destination files are the same but in different case on " + process.platform, function(callback) {
-			var newOutputImage = path.join(path.dirname(validResizeImageOptions.source), path.basename(validResizeImageOptions.source).toUpperCase());
+			const newOutputImage = path.join(path.dirname(validResizeImageOptions.source), path.basename(validResizeImageOptions.source).toUpperCase());
 
 			imageUtilities.resizeImage(
 				utilities.merge(
@@ -461,7 +461,7 @@ describe("Image Utilities", function() {
 		});
 
 		it("should handle errors returned by the get image information function", function(callback) {
-			var fileCheckInterval = setInterval(function() {
+			const fileCheckInterval = setInterval(function() {
 				fs.removeSync(validResizeImageOptions.destination);
 			});
 
