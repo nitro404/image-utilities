@@ -10,6 +10,28 @@ const fileUtilities = require("file-utilities");
 
 const imageUtilities = { };
 
+Object.defineProperty(imageUtilities, "ResizeModes", {
+	value: Object.freeze([
+		"contain",
+		"cover",
+		"fill",
+		"fit"
+	]),
+	enumerable: true
+});
+
+Object.defineProperty(imageUtilities, "DefaultResizeMode", {
+	value: "fit",
+	enumerable: true
+});
+
+const jimpResizeImageFunctionNames = Object.freeze({
+	contain: "contain",
+	cover: "cover",
+	fill: "resize",
+	fit: "scaleToFit"
+});
+
 const resizeImageFormat = {
 	type: "object",
 	removeExtra: true,
@@ -43,6 +65,20 @@ const resizeImageFormat = {
 			required: true,
 			validator: function(value) {
 				return value > 0;
+			}
+		},
+		resizeMode: {
+			type: "string",
+			case: "lower",
+			trim: true,
+			nonEmpty: true,
+			default: imageUtilities.DefaultResizeMode,
+			validator: function(value) {
+				if(imageUtilities.ResizeModes.indexOf(value) === -1) {
+					throw new Error(`Invalid image resize mode: '${value}'!`);
+				}
+
+				return true;
 			}
 		},
 		overwrite: {
@@ -196,7 +232,7 @@ imageUtilities.resizeImage = function(options, callback) {
 						return callback(error);
 					}
 
-					return image.scaleToFit(options.width, options.height)
+					return image[jimpResizeImageFunctionNames[options.resizeMode]](options.width, options.height)
 						.write(options.destination, function() { return callback(); });
 				});
 			},

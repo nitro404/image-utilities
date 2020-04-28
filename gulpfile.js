@@ -4,8 +4,5 @@ fabricator.setup({
 	name: "Image Utilities",
 	build: {
 		enabled: false
-	},
-	base: {
-		directory: __dirname
 	}
 });

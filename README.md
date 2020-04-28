@@ -10,9 +10,9 @@
 [![Contributors][contributors-image]][contributors-url]
 [![Pull Requests Welcome][pull-requests-image]][pull-requests-url]
 
-A collection of useful image file helper functions.
+A collection of useful image file JavaScript helper functions.
 
-## Server-Side Usage
+## Node.js Usage
 
 ```javascript
 const imageUtilities = require("image-utilities");
@@ -41,10 +41,6 @@ npm install image-utilities
 To build the distribution files for this module:
 ```bash
 npm run build
-```
-or
-```bash
-gulp build
 ```
 
 [npm-url]: https://www.npmjs.com/package/image-utilities

@@ -1,7 +1,7 @@
 {
   "name": "image-utilities",
-  "version": "1.0.5",
-  "description": "A collection of useful image file helper functions.",
+  "version": "1.0.6",
+  "description": "A collection of useful image file JavaScript helper functions.",
   "main": "src/image-utilities.js",
   "scripts": {
     "build": "gulp build",
