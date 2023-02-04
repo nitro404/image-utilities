@@ -37,7 +37,7 @@
     "file-utilities": "^1.0.5",
     "fs-extra": "^8.1.0",
     "image-size": "^0.8.3",
-    "jimp": "^0.9.6"
+    "jimp": "^0.16.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
