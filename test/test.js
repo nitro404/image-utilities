@@ -147,7 +147,7 @@ describe("Image Utilities", function() {
 									}
 
 									if(verbose) {
-										console.log("Removed temporary " + (stats.isDirectory() ? "directory" : "file") +": " + path);
+										console.log("Removed temporary " + (stats.isDirectory() ? "directory" : "file") + ": " + path);
 									}
 
 									return callback();
